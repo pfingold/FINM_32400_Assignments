@@ -34,61 +34,76 @@ def parse_inputs():
     print("Sucess - parsed inputs!")
     return parser.parse_args()
 
+def new_limit_order(message, cloid, orders):
+    """
+    Helper function that updates the orders dictionary (orders)
+    with relevant information from a message (message) for a new 
+    limit order based on its orderID (cloid)
+    Output: updated order dictionary
+    """
+    orders[cloid] = {
+        "ClOrdID" : cloid,
+        "OrderTransactTime" : message.get("60"),
+        "Symbol" : message.get("55"),
+        "Side" : message.get("54"),
+        "OrderQty" : message.get("38"),
+        "LimitPrice" : message.get("44")
+        }
+
+    return orders
+
+def create_fill_output(message, order):
+    """
+    Helper function to extract information for a specific Fill notification
+    based on content in the original message (message) and the exisitng 
+    order (order)
+
+    Output: set that contains the information for a specific Fill
+    that will correspond to a new line in the dataframe of order data
+    """
+    new_row = ({"OrderID" : order.get("ClOrdID"),
+                "OrderTransactTime" : order.get("OrderTransactTime"),
+                "ExecutionTransactTime" : message.get("60"),
+                "Symbol" : order.get("Symbol"),
+                "Side" : order.get("Side"),
+                "OrderQty" : order.get("OrderQty"),
+                "LimitPrice" : order.get("LimitPrice"),
+                "AvgPx" : message.get("6"),
+                "LastMkt" : message.get("30") })
+    return new_row
+
 def main():
+    """
+    Main function of this program
+    """
     args = parse_inputs()
     orders = {}
     new_rows = []
 
     with open(args.input_fix_file, "r") as f:
         for line in f:
-            if not line.strip():
-                continue
             message = {}
-            message_parts = line.split(SEPARATOR)
-            for part in message_parts:
+            for part in line.split(SEPARATOR):
                 if "=" in part:
                     #split into key-value pairs
                     key, value = part.split("=", 1)
                     message[key] = value
-
             if not message: #don't address empty message
                 continue
 
             msgtype = message.get("35")
+            cloid = message.get("11")
 
             #Limit orders being sent to the market:
             if msgtype == "D" and message.get("40") == "2":
-                cloid = message.get("11")
-                if cloid:
-                    orders[cloid] = {
-                        "ClOrdID" : cloid,
-                        "OrderTransactTime" : message.get("60"),
-                        "Symbol" : message.get("55"),
-                        "Side" : message.get("54"),
-                        "OrderQty" : message.get("38"),
-                        "LimitPrice" : message.get("44")
-                        }
-                    print("new limit order added!")
+                orders = new_limit_order(message, cloid, orders)
 
             #Fills received on those orders:
             elif msgtype == "8":
                 if message.get("150") == "2" and message.get("39") == "2":
-                    cloid = message.get("11")
-
-                    if cloid and cloid in orders:
-                        o = orders[cloid]
-                        new_rows.append({
-                            "OrderID" : o.get("ClOrdID"),
-                            "OrderTransactTime" : o.get("OrderTransactTime"),
-                            "ExecutionTransactTime" : message.get("60"),
-                            "Symbol" : o.get("Symbol"),
-                            "Side" : o.get("Side"),
-                            "OrderQty" : o.get("OrderQty"),
-                            "LimitPrice" : o.get("LimitPrice"),
-                            "AvgPx" : message.get("6"),
-                            "LastMkt" : message.get("30")
-                        })
-                        print("added a new row!")
+                    if cloid in orders: #confirm order exists
+                        new_row = create_fill_output (message, orders[cloid])
+                        new_rows.append(new_row)
 
     #Store the output in a dataframe:
     output_df = pd.DataFrame(new_rows)
@@ -111,8 +126,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-"""
-How to run in Terminal:
-python3 fix_to_csv.py --input_fix_file cleaned.fix --output_csv_file executions.csv
-"""
