@@ -10,6 +10,8 @@ This program will do the following:
     Note that the LastMkt column contains exchange (or broker) IDs
 (3) Calculate per exchange, the average savings by comparing limit price 
     vs average execution price (there should be no negative values)
+
+Classmates Cited: Ilija Steinmann & Annie Reynolds
 """
 
 import argparse
@@ -104,6 +106,7 @@ def main():
 
     #convert output to CSV:
     output_metrics_file = output_contents.to_csv(args.output_metrics_file, index = False)
+    print("Success - Output Metrics Availible")
     return output_metrics_file
 
 if __name__ == "__main__":

@@ -10,6 +10,8 @@ This program will do the following:
 (3) From the relevant orders, extract the relevant information (ie 
     corresponds to OUTPUT_COLUMNS)to be stored in the columns of 
     output_csv_file
+
+Classmates Cited: Ilija Steinmann & Annie Reynolds
 """
 import argparse
 import pandas as pd
