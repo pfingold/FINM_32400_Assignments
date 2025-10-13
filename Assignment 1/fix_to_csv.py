@@ -1,16 +1,16 @@
 """
-Task: create a program called fix_to_csv.py, 
+Assignment 1, Task 1:
+Create a program called fix_to_csv.py, 
 which will require two parameters: 
     --input_fix_file and --output_csv_file
 """
-
 import argparse
 import pandas as pd
 
-#identifier for SOH character
+#Identifier for SOH character:
 SEPARATOR = chr(1)
 
-#orders to look for
+#Desired orders:
 RELEVANT_FIELDS = [
     "35=D",
     "35=8",
@@ -18,12 +18,9 @@ RELEVANT_FIELDS = [
     "39=2",
     "40=2"]
 
-#Output columns in output_csv_file
+#Output columns for output_csv_file:
 OUTPUT_COLUMNS = ["OrderID", "OrderTransactTime", "ExecutionTransactTime",
                   "Symbol", "Side", "OrderQty", "LimitPrice", "AvgPx", "LastMkt"]
-
-#FIX messages look like "key = value" where ach key is a tag number &
-# value is the value for the tag, each tag-value pair is seprated by SOH
 
 def parse_inputs():
     """
@@ -58,7 +55,6 @@ def main():
                 continue
 
             msgtype = message.get("35")
-            #print("message type: ", msgtype)
 
             #Limit orders being sent to the market:
             if msgtype == "D" and message.get("40") == "2":
@@ -94,20 +90,21 @@ def main():
                         })
                         print("added a new row!")
 
+    #Store the output in a dataframe:
     output_df = pd.DataFrame(new_rows)
     output_df = output_df.reindex(columns = OUTPUT_COLUMNS)
 
-    #Numeric Consistency:
+    #Numeric consistency:
     for column in ["OrderQty", "LimitPrice", "AvgPx"]:
         if column in output_df.columns:
             output_df[column] = pd.to_numeric(output_df[column], errors = "coerce")
 
-    #DateTime Consistency:
+    #DateTime consistency:
     for column in ["OrderTransactTime", "ExecutionTransactTime"]:
         if column in output_df.columns:
             output_df[column] = pd.to_datetime(output_df[column], errors = "coerce")
 
-
+    #Convert dataframe to CSV file:
     output_csv_file = output_df.to_csv(args.output_csv_file, index = False)
     print("Success - FIX to CSV")
     return output_csv_file
@@ -116,5 +113,6 @@ if __name__ == "__main__":
     main()
 
 """
+How to run in Terminal:
 python3 fix_to_csv.py --input_fix_file cleaned.fix --output_csv_file executions.csv
 """
