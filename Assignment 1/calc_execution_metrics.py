@@ -29,38 +29,37 @@ def parse_inputs():
     print("Sucess - parsed inputs!")
     return parser.parse_args()
 
-def calculate_AvgPriceImprovement(exchange):
+def calculate_avg_price_improvement(exchange):
     """
-    Takes an exchange (GroupBy item) and calculates 
-    the average savings by comparing limit price vs 
-    average execution price
+    Helper function that takes an exchange (GroupBy item) 
+    and calculates  the average savings by comparing 
+    limit price vs average execution price
     """
-    exchange_size = len(exchange)
     #Convert data to numeric values:
     limit_price = pd.to_numeric(exchange["LimitPrice"], errors = "coerce")
     average_price = pd.to_numeric(exchange["AvgPx"], errors = "coerce")
     #Calculate average savings:
     avg_price_improvement = (limit_price - average_price).mean()
     return avg_price_improvement
-    
 
-def calculate_AvgExecSpeedSecs(exchange):
+def calculate_avg_exec_speed_secs(exchange):
     """
-    Takes an exchange (GroupBy item) and calculates 
-    the average execution speed in seconds
+    Helper function that tkes an exchange (GroupBy item) 
+    and calculates the average execution speed and returns
+    that quantity converted to seconds
     """
-    exchange_size = len(exchange)
     #Convert data to datetime values:
     execution_time = pd.to_datetime(exchange["ExecutionTransactTime"], errors = "coerce")
     transaction_time =  pd.to_datetime(exchange["OrderTransactTime"], errors = "coerce")
     avg_execution_time = (execution_time - transaction_time).mean()
     #Convert to seconds:
-    avg_execution_time_sec = avg_execution_time.total_seconds()
-    return avg_execution_time_sec
+    avg_execution_time_secs = avg_execution_time.total_seconds()
+    return avg_execution_time_secs
 
 def clean_exchange_name(exchange):
     """
     Helper function that removes symbols from exchange name
+    and returns the cleaned name without symbols
     """
     name = str(exchange)
     extra_chars = ["," , "(", ")", "'"]
@@ -72,8 +71,10 @@ def clean_exchange_name(exchange):
 
 
 def main():
+    """
+    Main function of this program
+    """
     args = parse_inputs()
-
     input_csv_file = args.input_csv_file
     output_metrics_file = args.output_metrics_file
 
@@ -88,12 +89,12 @@ def main():
     #Calculate metrics for each Exchange:
     for exchange_name, exchange_data in exchanges:
         cleaned_name = clean_exchange_name(exchange_name)
-        AvgPriceImprovement = calculate_AvgPriceImprovement(exchange_data)
-        AvgExecSpeedSecs = calculate_AvgExecSpeedSecs(exchange_data)
+        avg_price_improvement = calculate_avg_price_improvement(exchange_data)
+        avg_exec_speed_secs = calculate_avg_exec_speed_secs(exchange_data)
 
-        new_output_row = {"LastMkt" : cleaned_name, 
-                          "AvgPriceImprovement" : AvgPriceImprovement, 
-                          "AvgExecSpeedSecs" : AvgExecSpeedSecs
+        new_output_row = {"LastMkt" : cleaned_name,
+                          "AvgPriceImprovement" : avg_price_improvement, 
+                          "AvgExecSpeedSecs" : avg_exec_speed_secs
                           }
         print("Added a new row of metrics!")
 
