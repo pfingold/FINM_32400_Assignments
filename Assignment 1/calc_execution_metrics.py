@@ -1,16 +1,15 @@
 """
-Please create a program called calc_execution_metrics.py, 
+Assignment 1, Task 2:
+Rreate a program called calc_execution_metrics.py, 
 which will require two parameters: --input_csv_file and 
 --output_metrics_file
 
 This program will do the following:
-
-Read csv file as pandas
-Calculate per exchange average execution speed in seconds. 
+(1) Read csv file as pandas
+(2) Calculate per exchange average execution speed in seconds. 
     Note that the LastMkt column contains exchange (or broker) IDs
-Calculate per exchange, the average savings by comparing limit price 
+(3) Calculate per exchange, the average savings by comparing limit price 
     vs average execution price (there should be no negative values)
-
 """
 
 import argparse
@@ -40,8 +39,7 @@ def calculate_AvgPriceImprovement(exchange):
     #Convert data to numeric values:
     limit_price = pd.to_numeric(exchange["LimitPrice"], errors = "coerce")
     average_price = pd.to_numeric(exchange["AvgPx"], errors = "coerce")
-
-    #Calculate average savings
+    #Calculate average savings:
     avg_price_improvement = (limit_price - average_price).mean()
     return avg_price_improvement
     
@@ -55,9 +53,8 @@ def calculate_AvgExecSpeedSecs(exchange):
     #Convert data to datetime values:
     execution_time = pd.to_datetime(exchange["ExecutionTransactTime"], errors = "coerce")
     transaction_time =  pd.to_datetime(exchange["OrderTransactTime"], errors = "coerce")
-
     avg_execution_time = (execution_time - transaction_time).mean()
-    #Convert to seconds
+    #Convert to seconds:
     avg_execution_time_sec = avg_execution_time.total_seconds()
     return avg_execution_time_sec
 
@@ -84,7 +81,6 @@ def main():
     input_df = pd.read_csv(input_csv_file)
 
     output_contents = pd.DataFrame(columns = OUTPUT_COLUMNS)
-    #output_contents = output_contents.reindex(columns = OUTPUT_COLUMNS)
 
     #Split by Exchange ID:
     exchanges = input_df.groupby(["LastMkt"])
@@ -101,10 +97,11 @@ def main():
                           }
         print("Added a new row of metrics!")
 
-        #add new row to output dataframe
+        #add new row to output dataframe:
         output_contents = pd.concat([output_contents, pd.DataFrame([new_output_row])],
                                     ignore_index = True)
 
+    #convert output to CSV:
     output_metrics_file = output_contents.to_csv(args.output_metrics_file, index = False)
     print("Success - Calculated Metrics & Converted to CSV")
     return output_metrics_file
