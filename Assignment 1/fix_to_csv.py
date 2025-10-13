@@ -1,22 +1,21 @@
 """
 Assignment 1, Task 1:
-Create a program called fix_to_csv.py, 
-which will require two parameters: 
+Create a program called fix_to_csv.py, which will require two parameters: 
     --input_fix_file and --output_csv_file
+
+This program will do the following:
+(1) Read input FIX file
+(2) Extract the following relevant orders: 
+    ["35=D","35=8","150=2","39=2","40=2"]
+(3) From the relevant orders, extract the relevant information (ie 
+    corresponds to OUTPUT_COLUMNS)to be stored in the columns of 
+    output_csv_file
 """
 import argparse
 import pandas as pd
 
 #Identifier for SOH character:
 SEPARATOR = chr(1)
-
-#Desired orders:
-RELEVANT_FIELDS = [
-    "35=D",
-    "35=8",
-    "150=2",
-    "39=2",
-    "40=2"]
 
 #Output columns for output_csv_file:
 OUTPUT_COLUMNS = ["OrderID", "OrderTransactTime", "ExecutionTransactTime",
@@ -25,24 +24,22 @@ OUTPUT_COLUMNS = ["OrderID", "OrderTransactTime", "ExecutionTransactTime",
 def parse_inputs():
     """
     Helper function to parse command line arguments
+    Output: parsed arguments
     """
     parser = argparse.ArgumentParser(description = "Convert FIX to CSV")
-
     parser.add_argument("--input_fix_file", type = str, help = "Path to FIX file")
     parser.add_argument("--output_csv_file", type = str, help = "Path to CSV file")
-
-    print("Sucess - parsed inputs!")
     return parser.parse_args()
 
-def new_limit_order(message, cloid, orders):
+def new_limit_order(message, clorid, orders):
     """
     Helper function that updates the orders dictionary (orders)
     with relevant information from a message (message) for a new 
-    limit order based on its orderID (cloid)
+    limit order based on its OrderID (cloid)
     Output: updated order dictionary
     """
-    orders[cloid] = {
-        "ClOrdID" : cloid,
+    orders[clorid] = {
+        "ClOrdID" : clorid,
         "OrderTransactTime" : message.get("60"),
         "Symbol" : message.get("55"),
         "Side" : message.get("54"),
@@ -57,7 +54,6 @@ def create_fill_output(message, order):
     Helper function to extract information for a specific Fill notification
     based on content in the original message (message) and the exisitng 
     order (order)
-
     Output: set that contains the information for a specific Fill
     that will correspond to a new line in the dataframe of order data
     """
@@ -92,17 +88,17 @@ def main():
                 continue
 
             msgtype = message.get("35")
-            cloid = message.get("11")
+            clorid = message.get("11")
 
             #Limit orders being sent to the market:
             if msgtype == "D" and message.get("40") == "2":
-                orders = new_limit_order(message, cloid, orders)
+                orders = new_limit_order(message, clorid, orders)
 
             #Fills received on those orders:
             elif msgtype == "8":
                 if message.get("150") == "2" and message.get("39") == "2":
-                    if cloid in orders: #confirm order exists
-                        new_row = create_fill_output (message, orders[cloid])
+                    if clorid in orders: #confirm order exists
+                        new_row = create_fill_output (message, orders[clorid])
                         new_rows.append(new_row)
 
     #Store the output in a dataframe:

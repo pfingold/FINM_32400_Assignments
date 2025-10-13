@@ -20,13 +20,11 @@ OUTPUT_COLUMNS = ["LastMkt", "AvgPriceImprovement", "AvgExecSpeedSecs"]
 def parse_inputs():
     """
     Helper function to parse command line inputs
+    Output: parsed arguments
     """
     parser = argparse.ArgumentParser(description = "Convert FIX to CSV")
-
     parser.add_argument("--input_csv_file", type = str, help = "Path to CSV Input")
     parser.add_argument("--output_metrics_file", type = str, help = "Path to Metrics Output")
-
-    print("Sucess - parsed inputs!")
     return parser.parse_args()
 
 def calculate_avg_price_improvement(exchange):
@@ -34,6 +32,7 @@ def calculate_avg_price_improvement(exchange):
     Helper function that takes an exchange (GroupBy item) 
     and calculates  the average savings by comparing 
     limit price vs average execution price
+    Output: avg_price_improvement
     """
     #Convert data to numeric values:
     limit_price = pd.to_numeric(exchange["LimitPrice"], errors = "coerce")
@@ -47,6 +46,7 @@ def calculate_avg_exec_speed_secs(exchange):
     Helper function that tkes an exchange (GroupBy item) 
     and calculates the average execution speed and returns
     that quantity converted to seconds
+    Output: avg_execution_time_secs
     """
     #Convert data to datetime values:
     execution_time = pd.to_datetime(exchange["ExecutionTransactTime"], errors = "coerce")
@@ -60,6 +60,7 @@ def clean_exchange_name(exchange):
     """
     Helper function that removes symbols from exchange name
     and returns the cleaned name without symbols
+    Output: clean_name
     """
     name = str(exchange)
     extra_chars = ["," , "(", ")", "'"]
@@ -96,7 +97,6 @@ def main():
                           "AvgPriceImprovement" : avg_price_improvement, 
                           "AvgExecSpeedSecs" : avg_exec_speed_secs
                           }
-        print("Added a new row of metrics!")
 
         #add new row to output dataframe:
         output_contents = pd.concat([output_contents, pd.DataFrame([new_output_row])],
@@ -104,9 +104,7 @@ def main():
 
     #convert output to CSV:
     output_metrics_file = output_contents.to_csv(args.output_metrics_file, index = False)
-    print("Success - Calculated Metrics & Converted to CSV")
     return output_metrics_file
-
 
 if __name__ == "__main__":
     main()
