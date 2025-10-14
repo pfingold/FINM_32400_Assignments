@@ -37,7 +37,7 @@ def new_limit_order(message, clorid, orders):
     """
     Helper function that updates the orders dictionary (orders)
     with relevant information from a message (message) for a new 
-    limit order based on its OrderID (cloid)
+    limit order based on its OrderID (clorid)
     Output: updated order dictionary
     """
     orders[clorid] = {
@@ -48,7 +48,6 @@ def new_limit_order(message, clorid, orders):
         "OrderQty" : message.get("38"),
         "LimitPrice" : message.get("44")
         }
-
     return orders
 
 def create_fill_output(message, order):
@@ -86,8 +85,6 @@ def main():
                     #split into key-value pairs
                     key, value = part.split("=", 1)
                     message[key] = value
-            if not message: #don't address empty message
-                continue
 
             msgtype = message.get("35")
             clorid = message.get("11")

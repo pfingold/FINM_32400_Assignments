@@ -68,10 +68,8 @@ def clean_exchange_name(exchange):
     extra_chars = ["," , "(", ")", "'"]
     for char in extra_chars:
         name = name.replace(char, "")
-
     clean_name = name.strip()
     return clean_name
-
 
 def main():
     """
@@ -83,7 +81,7 @@ def main():
 
     #Read csv file as pandas:
     input_df = pd.read_csv(input_csv_file)
-
+    #New dataframe to store relevant metrics:
     output_contents = pd.DataFrame(columns = OUTPUT_COLUMNS)
 
     #Split by Exchange ID:
@@ -100,11 +98,11 @@ def main():
                           "AvgExecSpeedSecs" : avg_exec_speed_secs
                           }
 
-        #add new row to output dataframe:
+        #Add new row to output dataframe:
         output_contents = pd.concat([output_contents, pd.DataFrame([new_output_row])],
                                     ignore_index = True)
 
-    #convert output to CSV:
+    #Convert output to CSV:
     output_metrics_file = output_contents.to_csv(args.output_metrics_file, index = False)
     print("Success - Output Metrics Availible")
     return output_metrics_file
