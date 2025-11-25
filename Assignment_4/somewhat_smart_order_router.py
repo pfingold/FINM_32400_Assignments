@@ -84,7 +84,7 @@ def best_price_improvement(symbol: str, side: str, quantity: int,
     }])
 
     #Store Outputs from Each Model as a Dictionary
-        # where keys = Exchange ID & values = predicted price improvement
+        #where keys = Exchange ID & values = predicted price improvement
     price_improvements = {}
 
     #Load Models:
