@@ -23,7 +23,7 @@ def load_models(trained_model_paths: Dict[str, str]) -> Dict[str, object]:
     from their file paths, using joblib functionality
 
     Inputs:
-        trained_model_paths (List[str]): list of file paths to trained models
+        trained_model_paths (Dict[str, str]): list of file paths to trained models
     Outputs:
         loaded_models (Dict[str, object]): dictionary of the loaded trained models
     """
