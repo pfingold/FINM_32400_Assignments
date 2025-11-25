@@ -61,13 +61,16 @@ def best_price_improvement(symbol: Optional[str], side: str, quantity: int,
     #Confirm Valid Inputs:
     if side not in ['B', 'S']:
         raise ValueError('Invalid side, must be \'B\' for buy or \'S\' for sell)')
-    if quantity <= 0:
+    if quantity <= 0 or not isinstance(quantity, int):
         raise ValueError('Quantity must be positive integer')
-    if limit_price <= 0 or bid_price <= 0 or ask_price <= 0:
-        raise ValueError('Prices must be positive')
-    if (bid_size < 0 or ask_size < 0) or \
+    if limit_price <= 0 or bid_price <= 0 or ask_price <= 0 \
+        or (not isinstance(limit_price, float)) \
+        or (not isinstance(bid_price, float)) \
+        or (not isinstance(ask_price, float)):
+        raise ValueError('Prices must be positive floats')
+    if (bid_size <= 0 or ask_size <= 0) or \
         (not isinstance(bid_size, int)) or (not isinstance(ask_size, int)):
-        raise ValueError('Sizes must be non-negative integers')
+        raise ValueError('Sizes must be positive integers')
 
     side_numeric = 1 if side == 'B' else 2
     model_input = pd.DataFrame([{
