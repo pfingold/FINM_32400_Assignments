@@ -8,7 +8,7 @@ those models
 Classmates Cited: Annie Reynolds
 
 """
-from typing import Dict, Optional, Tuple
+from typing import Dict, Tuple
 import pandas as pd
 from joblib import load
 
@@ -35,7 +35,7 @@ def load_models(trained_model_paths: Dict[str, str]) -> Dict[str, object]:
     return loaded_models
 
 #Function to Identify Best Price Improvement:
-def best_price_improvement(symbol: Optional[str], side: str, quantity: int,
+def best_price_improvement(symbol: str, side: str, quantity: int,
                            limit_price: float, bid_price: float,
                            ask_price: float, bid_size: int, ask_size: int) -> Tuple[str, float]:
     """
@@ -62,7 +62,7 @@ def best_price_improvement(symbol: Optional[str], side: str, quantity: int,
     if side not in ['B', 'S']:
         raise ValueError('Invalid side, must be \'B\' for buy or \'S\' for sell)')
     if quantity <= 0 or not isinstance(quantity, int):
-        raise ValueError('Quantity must be positive integer')
+        raise ValueError('Quantity must be a positive integer')
     if limit_price <= 0 or bid_price <= 0 or ask_price <= 0 \
         or (not isinstance(limit_price, float)) \
         or (not isinstance(bid_price, float)) \
