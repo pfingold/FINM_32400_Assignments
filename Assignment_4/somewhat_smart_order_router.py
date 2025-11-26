@@ -23,7 +23,7 @@ def load_models(trained_model_paths: Dict[str, str]) -> Dict[str, object]:
     from their file paths, using joblib functionality
 
     Inputs:
-        trained_model_paths (Dict[str, str]): list of file paths to trained models
+        trained_model_paths (Dict[str, str]): dictionary of file paths to trained models
     Outputs:
         loaded_models (Dict[str, object]): dictionary of the loaded trained models
     """
@@ -54,21 +54,21 @@ def best_price_improvement(symbol: str, side: str, quantity: int,
         bid_size: order bid size
         ask_size: order ask size
     Outputs:
-        best_exchange (str): exchange id with the best predicted price improvemnent
+        best_exchange (str): exchange id with the best predicted price improvement
         best_price_improvement (float): predicted price improvement at best_exchange
     """
 
     #Confirm Valid Inputs:
     if side not in ['B', 'S']:
         raise ValueError('Invalid side, must be \'B\' for buy or \'S\' for sell')
-    if quantity <= 0 or not isinstance(quantity, int):
+    if not isinstance(quantity, int) or quantity <= 0:
         raise ValueError('Quantity must be a positive integer')
-    if limit_price <= 0 or bid_price <= 0 or ask_price <= 0:
-        raise ValueError('Prices must be positive numbers')
     if not isinstance(limit_price, (int, float)) or \
        not isinstance(bid_price, (int, float)) or \
        not isinstance(ask_price, (int, float)):
         raise ValueError('Prices must be numeric values')
+    if limit_price <= 0 or bid_price <= 0 or ask_price <= 0:
+        raise ValueError('Prices must be positive numbers')
     if (bid_size <= 0 or ask_size <= 0) or \
         (not isinstance(bid_size, int)) or (not isinstance(ask_size, int)):
         raise ValueError('Sizes must be positive integers')
@@ -85,7 +85,7 @@ def best_price_improvement(symbol: str, side: str, quantity: int,
     }])
 
     #Store Outputs from Each Model as a Dictionary
-        #where keys = Exchange ID & values = predicted price improvement
+    #where keys = Exchange ID & values = predicted price improvement
     price_improvements = {}
 
     #Load Models:
